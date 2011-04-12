@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Tag:</b>
+  <%= @qritem.tag %>
+</p>
+
+<p>
+  <b>Url:</b>
+  <%= @qritem.url %>
+</p>
+
+
+<%= link_to 'Edit', edit_qritem_path(@qritem) %> |
+<%= link_to 'Back', qritems_path %>
