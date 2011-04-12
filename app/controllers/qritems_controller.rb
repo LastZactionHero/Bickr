@@ -98,19 +98,11 @@ class QritemsController < ApplicationController
     
     # Create a QR code url from this tag name using the Google API
     @qr_url = "http://chart.apis.google.com/chart?chs=200x200&cht=qr&chl=" + URI.escape(@tag_url) + "%0A"
-
-    location = Location.new
-    location.name = "test name"
-    location.comment = "test comment"
-    location.lat = "test lat"
-    location.lon = "test lon"
-    location.save
     
     # Save this tag
     @new_qr_item = Qritem.new
     @new_qr_item.tag = @tag.strip
     @new_qr_item.url = @qr_url
-    @new_qr_item.locations << location
     @new_qr_item.save
     
   end
