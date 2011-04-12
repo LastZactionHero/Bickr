@@ -1,5 +1,9 @@
 Bickr::Application.routes.draw do
+  resources :locations
+
   match 'qritems/generate' => 'qritems#generate'
+  match 'qritems/tag' => 'qritems#tag'
+  match 'qritems/view' => 'qritems#view'
   match '/view/:id' => 'qritems#view'
   
   resources :qritems

@@ -99,10 +99,18 @@ class QritemsController < ApplicationController
     # Create a QR code url from this tag name using the Google API
     @qr_url = "http://chart.apis.google.com/chart?chs=200x200&cht=qr&chl=" + URI.escape(@tag_url) + "%0A"
 
+    location = Location.new
+    location.name = "test name"
+    location.comment = "test comment"
+    location.lat = "test lat"
+    location.lon = "test lon"
+    location.save
+    
     # Save this tag
     @new_qr_item = Qritem.new
     @new_qr_item.tag = @tag.strip
     @new_qr_item.url = @qr_url
+    @new_qr_item.locations << location
     @new_qr_item.save
     
   end
@@ -110,10 +118,39 @@ class QritemsController < ApplicationController
   # VIEW /:id
   # View a QR item
   def view    
+    params.inspect
     @tag = params[:id].to_s.strip      
     @item = Qritem.find( :first, :conditions => ["tag = '#{@tag}'"] )      
     
   end
 
+  # TAG /update
+  # Add a tag to a QRItem
+  def tag
+    puts "TAG()"
+    params.inspect
+    
+    tag = params[:id].to_s.strip
+    name = params[:name].to_s.strip
+    comment = params[:comment].to_s.strip
+    lat = params[:lat].to_s.strip
+    lon = params[:lon].to_s.strip
+    
+    item = Qritem.find( :first, :conditions => ["tag = '#{tag}'"])
+    if item
+      location = Location.new
+      location.name = name
+      location.comment = comment
+      location.lat = lat
+      location.lon = lon
+      location.save
+      
+      item.locations << location
+      item.save
+    end  
+    
+    redirect_to :action => "view", :id => "#{tag}"
+  end
+  
   
 end

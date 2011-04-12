@@ -1,4 +1,52 @@
+<script type="text/javascript">
+
+  var lat = 0;
+  var lon = 0;
+  
+  function handlePositionFound(position) {
+  	document.getElementById("d_current_position").innerHTML = "Current Position<br>Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
+  	
+  	lat = position.coords.latitude;
+  	lon = position.coords.longitude;
+  }
+  
+  function registerTag() {
+    name = document.getElementById("f_name").value
+    comment = document.getElementById("f_comment").value
+    
+    name = encodeURIComponent( name );
+    comment = encodeURIComponent( comment );
+    
+    window.location = "/qritems/tag?id=<%= @item.tag %>&name=" + name + "&comment=" + comment + "&lat=" + lat + "&lon=" + lon
+    
+  }
+</script>
+
+
 Tag Found!<br><br>
 
 Created: <%= @item.created_at %><br>
 Tag ID: <%= @item.tag %><br>
+<br>
+<div id="d_current_position">Fetching current position...</div>
+ 
+Name: <input id="f_name" type="text"><br>
+Comment: <input id="f_comment" type="text"><br>
+<a onclick="javascript:registerTag()">Tag This Item</a><br>
+
+<br>
+History<br>
+<% location_idx = 1 %>
+<% @item.locations.each do |location| %>
+  Record: <%= location_idx %><br>
+  Name: <%= location.name %><br>
+  Comment: <%= location.comment %><br>
+  Latitude: <%= location.lat %><br>
+  Longitude: <%= location.lon %><br>
+  <% location_idx = location_idx + 1 %>
+  <br><br>
+<% end %>
+ 
+<script type="text/javascript">
+  navigator.geolocation.getCurrentPosition(handlePositionFound);
+</script>
