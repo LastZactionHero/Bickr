@@ -23,20 +23,28 @@
 </script>
 
 
-Tag Found!<br><br>
+Bickr Tag Viewer<br><br>
 
+<strong>Tag Information</strong><br>
 Created: <%= @item.created_at %><br>
 Tag ID: <%= @item.tag %><br>
-<br>
-<div id="d_current_position">Fetching current position...</div>
- 
-Name: <input id="f_name" type="text"><br>
-Comment: <input id="f_comment" type="text"><br>
-<a onclick="javascript:registerTag()">Tag This Item</a><br>
+<br><br>
+
+<strong>Post to this Tag</strong>
+<div id="d_current_position">Please wait while your browser loads the current position.<br>This may take several seconds and require you to enable location sharing.<br>Latitude: loading...<br>Longitude: loading...</div>
+<table>
+<tr><td>Name:</td><td><input id="f_name" type="text"></td></tr>
+<tr><td>Comment:</td><td><input id="f_comment" type="text"></td></tr>
+<tr><td>&nbsp;</td><td><a onclick="javascript:registerTag()">Add Your Location</a></td></tr>
+</table>
+
 
 <br>
-History<br>
+<strong>History</strong><br>
 <% location_idx = 1 %>
+<% if @item.locations.size == 0 %>
+This tag has not been geotagged.
+<% end %>
 <% @item.locations.each do |location| %>
   Record: <%= location_idx %><br>
   Name: <%= location.name %><br>
