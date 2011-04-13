@@ -1,8 +1,23 @@
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?libraries=geometry&sensor=true"></script>
+
 <script type="text/javascript">
 
   var lat = 0;
   var lon = 0;
   
+  //-----------------------------------------------------------
+  // Class: Location Tag Type
+  //-----------------------------------------------------------
+  function BLocationType(name, comment, lat, lon) {
+  	this.name = name;
+  	this.comment = comment;
+  	this.lat = lat;
+  	this.lon = lon;
+  }
+    
+  //-----------------------------------------------------------
+  // Handle Position Found Callback
+  //-----------------------------------------------------------
   function handlePositionFound(position) {
   	document.getElementById("d_current_position").innerHTML = "Current Position<br>Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
   	
@@ -10,6 +25,9 @@
   	lon = position.coords.longitude;
   }
   
+  //-----------------------------------------------------------
+  // Appends Name, Comment, and Location to Current Tag
+  //-----------------------------------------------------------
   function registerTag() {
     name = document.getElementById("f_name").value
     comment = document.getElementById("f_comment").value
@@ -17,15 +35,89 @@
     name = encodeURIComponent( name );
     comment = encodeURIComponent( comment );
     
-    window.location = "/qritems/tag?id=<%= @item.tag %>&name=" + name + "&comment=" + comment + "&lat=" + lat + "&lon=" + lon
-    
+    window.location = "/qritems/tag?id=<%= @item.tag %>&name=" + name + "&comment=" + comment + "&lat=" + lat + "&lon=" + lon    
   }
+  
+  // Google Maps Global Variables
+  var gMap = null;
+  
+  // Generate Lat/Lon Array
+  var gMapPointCount = <%= @item.locations.size %>;
+  var gMapPoints = new Array
+  						( 
+  							<% @item.locations.each do |location| %>
+  							  <%= "new BLocationType( '#{location.name}', '#{location.comment}', #{location.lat}, #{location.lon} )" %>,
+  							<% end %>
+  							new Array( 0, 0 )
+  						);
+  var gMarkers = new Array();
+  var gInfoWindows = new Array();
+  
+  //-----------------------------------------------------------
+  // Initialize Google Maps
+  //-----------------------------------------------------------
+  function initializeGoogleMaps() {  	
+    if( gMapPointCount > 0 ) {
+	    
+	    // Configure Map Options
+	  	var myLatlng = new google.maps.LatLng(gMapPoints[0].lat, gMapPoints[0].lon);
+	    var mapOptions = {
+	    	zoom: 12,
+	    	center: myLatlng,
+	    	mapTypeId: google.maps.MapTypeId.ROADMAP    
+	    }
+	    
+	    // Create New Map
+	  	gMap = new google.maps.Map(document.getElementById("d_map"), mapOptions);
+	  	
+	  	// Add Map Points
+	  	for(i = 0; i < gMapPointCount; i++) {
+	  		var markerLatLon = new google.maps.LatLng(gMapPoints[i].lat, gMapPoints[i].lon);
+
+			gInfoWindows[i] = new google.maps.InfoWindow({
+				content: gMapPoints[i].name
+				});
+				
+ 	  		gMarkers[i] = new google.maps.Marker({
+	  			position: markerLatLon,
+	  			map: gMap,
+	  			title: gMapPoints[i].name
+ 	  			});
+ 	  		
+ 	  		google.maps.event.addListener(gMarkers[i], 'click', makeMarkerCenterEvent(gMap, gMarkers[i], gInfoWindows[i]) );
+	  	}
+	} else {
+		document.getElementById("d_map").innerHTML = "This tag has not been geotagged!";
+	}	
+  }
+
+  //-----------------------------------------------------------
+  // Event Factory for Marker Center Event
+  //-----------------------------------------------------------
+  function makeMarkerCenterEvent(map, marker, infoWindow) {
+  	return function() {
+		map.setCenter(marker.position);
+  	}
+  }
+  
+  //-----------------------------------------------------------
+  // Load Google Maps
+  //-----------------------------------------------------------
+  function loadGoogleMaps() {
+  	var script = document.createElement("script");
+  	script.type = "text/javascript";
+  	script.src = "http://maps.google.com/maps/api/js?sensor=false&callback=initializeGoogleMaps";
+  	document.body.appendChild(script);
+  }
+  
+  window.onload = loadGoogleMaps();
+  
 </script>
 
 
 Bickr Tag Viewer<br><br>
 
-<strong>Tag Information</strong><br>
+ <strong>Tag Information</strong><br>
 Created: <%= @item.created_at %><br>
 Tag ID: <%= @item.tag %><br>
 <br><br>
@@ -38,6 +130,9 @@ Tag ID: <%= @item.tag %><br>
 <tr><td>&nbsp;</td><td><a onclick="javascript:registerTag()">Add Your Location</a></td></tr>
 </table>
 
+
+<br>
+<div id="d_map" style="width:300px; height:300px"></div>
 
 <br>
 <strong>History</strong><br>
