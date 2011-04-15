@@ -1,3 +1,92 @@
+<style type="text/css">
+.c_rect_main {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+	background-color: #FFF;
+	position: absolute;
+	height: 110%;
+	width: 95%;
+	top: 10px;
+	bottom: 10px;
+	border: 5px solid #F30;
+	margin-left: auto;
+	margin-right:auto;
+}
+.c_rect_title {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+	position: relative;
+	height: 55px;
+	width: 98%;
+	top: 5px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #FFF;
+}
+
+.c_rect_post {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+	background-color: #FFF;
+	position: relative;
+	width: 98%;
+	top: 20px;
+	margin-left: auto;
+	margin-right: auto;
+}
+.c_rect_map {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+	background-color: #FFF;
+	position: relative;	
+	width: 98%;
+	top: 25px;
+	margin-right: auto;
+	margin-left: auto;
+	
+}
+.c_rect_comments {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+	background-color: #FFF;
+	width: 98%;
+	margin-right: auto;
+	margin-left: auto;
+	position: relative;
+	top: 30px;
+}
+.c_rect_comments_entry {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+	border-top-width: 2px;
+	border-right-width: 2px;
+	border-bottom-width: 2px;
+	border-left-width: 2px;
+	border-top-style: dotted;
+	margin-top: 15px;
+}
+
+.s_heading_section {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 24px;
+	font-weight: bold;
+	font-style: italic;
+}
+
+.s_link_major {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 18px;
+	font-weight: bold;
+	font-style: italic;
+}
+
+.s_text {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+}
+</style>
+
+
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?libraries=geometry&sensor=true"></script>
 
 <script type="text/javascript">
@@ -19,7 +108,7 @@
   // Handle Position Found Callback
   //-----------------------------------------------------------
   function handlePositionFound(position) {
-  	document.getElementById("d_current_position").innerHTML = "Current Position<br>Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
+  	document.getElementById("d_current_position").innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
   	
   	lat = position.coords.latitude;
   	lon = position.coords.longitude;
@@ -115,41 +204,44 @@
 </script>
 
 
-Bickr Tag Viewer<br><br>
-
- <strong>Tag Information</strong><br>
-Created: <%= @item.created_at %><br>
-Tag ID: <%= @item.tag %><br>
-<br><br>
-
-<strong>Post to this Tag</strong>
-<div id="d_current_position">Please wait while your browser loads the current position.<br>This may take several seconds and require you to enable location sharing.<br>Latitude: loading...<br>Longitude: loading...</div>
-<table>
-<tr><td>Name:</td><td><input id="f_name" type="text"></td></tr>
-<tr><td>Comment:</td><td><input id="f_comment" type="text"></td></tr>
-<tr><td>&nbsp;</td><td><a onclick="javascript:registerTag()">Add Your Location</a></td></tr>
+<div class="c_rect_main" id="d_rect_main">
+  <div class="c_rect_title" id="d_rect_title">
+  <img src="/images/bickr_logo.jpg" width="200" height="55" /></div>
+  <div class="c_rect_post" id="d_rect_post">
+  	<span class="s_heading_section">POST</span>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="s_text">Name:</td><td><input id="f_name" type="text" class="s_text"></td></tr>
+  <tr><td class="s_text">Comment:</td><td><input id="f_comment" type="text" class="s_text"></td></tr>
+  <tr><td class="s_text">Location:</td><td class="s_text"><div id="d_current_position">Loading Location...</div></td></tr>
+  <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+  <tr><td>&nbsp;</td><td class="s_link_major"><a onclick="javascript:registerTag()">Add Comment</a></td></tr>
+  </tr>
 </table>
+  
+  </div>
+  <div class="c_rect_map" id="d_rect_map"><div id="d_map" style="width:100%; height:300px"></div></div>
+  
+  <div class="c_rect_comments" id="d_rect_comments">
+  	<span class="s_heading_section">Tag History</span><br />
+  	
+	<% location_idx = 1 %>
+	<% if @item.locations.size == 0 %>
+	This tag has not been geotagged.
+	<% end %>
+	<% @item.locations.each do |location| %>
+	  
+	  	<div class="c_rect_comments_entry">
+	    <%= location.name %> - <%= location.created_at %><br />
+	    <%= location.comment %>
+	    </div>
 
+	<% end %>
 
-<br>
-<div id="d_map" style="width:300px; height:300px"></div>
+  </div>
+  
+  
+</div>
 
-<br>
-<strong>History</strong><br>
-<% location_idx = 1 %>
-<% if @item.locations.size == 0 %>
-This tag has not been geotagged.
-<% end %>
-<% @item.locations.each do |location| %>
-  Record: <%= location_idx %><br>
-  Name: <%= location.name %><br>
-  Comment: <%= location.comment %><br>
-  Latitude: <%= location.lat %><br>
-  Longitude: <%= location.lon %><br>
-  <% location_idx = location_idx + 1 %>
-  <br><br>
-<% end %>
- 
 <script type="text/javascript">
   navigator.geolocation.getCurrentPosition(handlePositionFound);
 </script>
